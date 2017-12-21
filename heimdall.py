@@ -374,7 +374,7 @@ def heimdallInit(calibrate = False, dynamic = True, history_samples = 10, conser
 				for i in range (10):
 					print("#####################################################################")
 				time.sleep(1)
-				if(analyze == False):
+				if(analyze == True):
 					try:
 						rate, data = get_wav_info(fil)
 						# I found these next 5 lines of coding on how to create a specgram on Python online
@@ -426,9 +426,6 @@ def heimdallInit(calibrate = False, dynamic = True, history_samples = 10, conser
 					## This is a much more effective approach because wake words are short and                                    ##
 					## can often look different based on vocal form.                                                              ##
 					##                                                                                                            ##
-					## In order to train the net, simply run this python file in the same folder that                             ##
-					## holds all the other directories of images. It is advised to disable the print                              ##
-					## message if you want it to run in the background since writing to stdout is expensive                       ##
 					##                                                                                                            ##
 					## A pre-converted set from Google's open source wake words library into Spectograms                          ##
 					## was open sourced by this project. I have uploaded them through the following                               ##
