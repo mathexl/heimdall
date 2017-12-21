@@ -93,7 +93,7 @@ def label_wav(wav, labels, graph, input_name, output_name, how_many_labels):
 
 
 
-def heimdallInit(dynamic = True, history_samples = 10, conservative = False):
+def heimdallInit(calibrate = False, dynamic = True, history_samples = 10, conservative = False):
 	###############################################
 	#                                             #
 	#  Takes audio stream and calls forward-pass  #
@@ -106,7 +106,7 @@ def heimdallInit(dynamic = True, history_samples = 10, conservative = False):
 	#great tutorial
 
 	CHUNK = 1024 #chunk of data per frame
-	FORMAT = pyaudio.paInt8 #utilizing pyaudio library to take hardware output to wav file
+	FORMAT = pyaudio.paInt16 #utilizing pyaudio library to take hardware output to wav file
 	CHANNELS = 1 #mono
 	RATE = 16000 #rate of data write in stream
 	RECORD_SECONDS = 3 #amount of time stored in the buffer at any point.
@@ -179,7 +179,7 @@ def heimdallInit(dynamic = True, history_samples = 10, conservative = False):
 	print("Say the words once printed to calibrate mic against background environment")
 	p = pyaudio.PyAudio() #init main pyAudio file
 
-	if(1 == 2):
+	if(calibrate):
 		calibrateStream = p.open(format=FORMAT,
 		  	        channels=CHANNELS,
 		            rate=RATE,
@@ -247,17 +247,19 @@ def heimdallInit(dynamic = True, history_samples = 10, conservative = False):
 
 		print("recording")
 		frames = []
-		frames = [0] * int(RATE / CHUNK * RECORD_SECONDS) * 2 * 1000
+		frames = ['\xff'] * int(RATE / CHUNK * RECORD_SECONDS) * 2 * 10000
 		# init array of streams that is created just for a window of the record_seconds * 2
 
-		i = 0 #trigger
+		i = 100 #trigger
 		soonTrigger = 0 #when triggered, this will write a file of the last frames of the last 50 frames 10 frames later
 
 
 		sample_count = 0
+		j = 0
 		while(1):
 			i = i + 1 #increment index.
-			i = i % ((int(RATE / CHUNK * RECORD_SECONDS)) * 2 * 1000 - 1)#modulate to current index
+			j = j + 1 #independent counter (helpful)
+			i = i % ((int(RATE / CHUNK * RECORD_SECONDS)) * 2 * 10000 - 1)#modulate to current index
 			sample_count = sample_count + 1; #increment the sample count
 			data = stream.read(CHUNK) #grab data from main stream
 			rms = audioop.rms(data, 2) #volume utilizing audioop
@@ -271,11 +273,12 @@ def heimdallInit(dynamic = True, history_samples = 10, conservative = False):
 				thresh = avg_total + (variance_measure)
 			else:
 				thresh = avg_total + (2 * variance_measure)
-			#print("LTM: " + str(avg_total) + "::LV: " + str(modval) + "::STM: " + str(rechist) + "::THRESH: " + str(thresh) + " ::VAR: " + str(variance_measure))
+			if(i%6 == 0):
+				print("LTM: " + str(avg_total) + "::LV: " + str(modval) + "::STM: " + str(rechist) + "::THRESH: " + str(thresh) + " ::VAR: " + str(variance_measure))
 			if(sample_count > 50 and (rechist > thresh)):
 				#pull samples
 				if(soonTrigger == 0):
-					soonTrigger = sample_count
+					soonTrigger = j
 				if(i%6 == 0): #only every sixth integrate into the average
 					avg_total = float((modval + lst) / sample_count) #calculate average of the quartic root of volume
 					vari = abs(avg_total - modval)
@@ -294,12 +297,12 @@ def heimdallInit(dynamic = True, history_samples = 10, conservative = False):
 					variance_measure = float(variance_measure * .999) + float((vari) * .001)  #skew to more recent data via a static pull
 					avg_total = float(avg_total * .98) + float((modval) * .02)  #skew to more recent data via a static pull
 
-			if(not(soonTrigger == 0) and (sample_count - soonTrigger) == 10):
+			if(not(soonTrigger == 0) and (j - soonTrigger) > 10):
 				stream.stop_stream() #dont want to incur overflow due to file I/O Latency
 				#will multithread if time permits to allow conseq
 
-				traceback = 120
-				if(i - 120 < 0):
+				traceback = 20
+				if(i - 20 < 0):
 					traceback = i
 				sel = frames[(i - traceback):i]
 				fil = "generated_samples/" + str(sample_count) + "_" + WAVE_OUTPUT_FILENAME
@@ -312,7 +315,10 @@ def heimdallInit(dynamic = True, history_samples = 10, conservative = False):
 				except:
 					wf.close()
 					stream.start_stream()
+					print(sel)
 					print("MISS")
+					print(str(i - traceback) + " :: " + str(i))
+					wf.writeframes(b''.join(sel))
 					continue
 				wf.close()
 				for i in range (10):
