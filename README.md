@@ -2,7 +2,9 @@
 
 ![](https://dl.dropbox.com/s/yj50zjqjdgoz32v/Screen%20Shot%202017-12-21%20at%2012.35.47%20PM.png?dl=0)
 
-Low CPU Usage that buffers in input to the Neural Nets for analysis only when a disturbance is detected via the Audio's RMS.
+Low CPU Usage that buffers in input to the Neural Nets for analysis only when a disturbance is detected via the Audio's RMS. The original purpose of this project was to implement a low memory runtime for a wake word spotter. However, since I used python, this is a null and void implementation due to the space of its dependencies. 
+
+Heimdall's primary advantage, hence, is its low file I/O and CPU usage by being picky about when to pick up keywords. 
 
 ## Pre-Reqs
 
