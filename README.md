@@ -6,6 +6,8 @@ Low CPU Usage that buffers in input to the Neural Nets for analysis only when a 
 
 Heimdall's primary advantage, hence, is its low file I/O and CPU usage by being picky about when to pick up keywords. 
 
+Demo: http://pregasen.com/sr.html
+
 ## Pre-Reqs
 
 You likely will need to do a pip install of Pillow, matplotlib, wavfile, tensorflow, and audioop.
