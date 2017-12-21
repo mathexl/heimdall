@@ -18,13 +18,11 @@ There are a few configurations discussed further below.
 
 ## Generating Your Own Spectogram Library
 
-Heimdall utilizes a secondary NN to provide more context to a recording by transcribing the audio recording into a spectogram and running it                                       
-through MobileNet which has a ~50% level of accuracy. This NN is not utilized to make a prediction - rather - helps sort between two close words that                                    
-may be similar by the primary net. The same model was trained with Inception architecture for the same accuracy. Exploding the validation set to the entire set had no effect on the training accuracy.                                                                                                  ##
+Heimdall utilizes a secondary NN to provide more context to a recording by transcribing the audio recording into a spectogram and running it through MobileNet which has a ~50% level of accuracy. This NN is not utilized to make a prediction - rather - helps sort between two close words that may be similar by the primary net. The same model was trained with Inception architecture for the same accuracy. Exploding the validation set to the entire set had no effect on the training accuracy.                                                                                                  
 
-A pre-converted set from Google's open source wake words library into Spectograms was open sourced by this project. I have uploaded them through the following                               
-links, which includes 22,500 jpgs sorted by classification. Converting the set took a long long time (much longer than expected, file I/O seems to lock out pretty fast)                  
-so it is best to just download the pre-compiled bundle to save time.                                       
+A pre-converted set from Google's open source wake words library into Spectograms was open sourced by this project. I have uploaded them through the following links, which includes 22,500 jpgs sorted by classification. Converting the set took a long long time (much longer than expected, file I/O seems to lock out pretty fast) so it is best to just download the pre-compiled bundle to save time.
+
+The spectograms are rendered in the 'viridis' color scheme. You can change the scheme in the file easily. 
                                                                                                            
 .zip     | https://storage.googleapis.com/speech-recog/hotwordSpectogramDataset.zip (4.54 GB)              
 .tar.gz  | https://storage.googleapis.com/speech-recog/hotwordSpectogramDataset.tar.gz (1.59 GB)           
