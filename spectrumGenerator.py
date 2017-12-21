@@ -44,7 +44,6 @@ numeric = randrange(2390, 4902390) #this is a random value so that the file name
 
 
 def graph_spectrogram(wav_file, output):
-
     #should always succeed unless one of your files isnt a wav file.
     try:
         rate, data = get_wav_info(wav_file)
@@ -73,13 +72,14 @@ def graph_spectrogram(wav_file, output):
     except:
         return 0
 
+
 def get_wav_info(wav_file):
     rate, data = wavfile.read(wav_file)
     return rate, data
 
 
 
-if __name__ == '__main__': # Main function
+def routine(): # Main function
     dirs = ["cat", "dog", "down", "eight", "five", "four", "go", "happy", "house", "left", "marvin", "nine", "no", "off", "on", "one", "right", "seven", "sheila", "six", "stop", "three", "tree", "two", "up", "wow", "yes", "zero"]
 
     #current directory names, could be gathered via os but decided to hardcode it so other folders could be in there uneffected
