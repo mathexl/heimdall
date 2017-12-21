@@ -1,5 +1,7 @@
 # Heimdall
 
+![](https://dl.dropbox.com/s/yj50zjqjdgoz32v/Screen%20Shot%202017-12-21%20at%2012.35.47%20PM.png?dl=0)
+
 Low memory filter that buffers in input to the Neural Nets for analysis only when a disturbance is detected via the Audio's RMS.
 
 ## Pre-Reqs
