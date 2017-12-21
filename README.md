@@ -34,19 +34,19 @@ e.g.
 ```
 python main.py --conservative --calibrate --dynamic
 ```
-#--conservative
+`--conservative`
 Is far more likely (~4x) to pull a segment of audio into the parser 
 
-#--calibrate
+`--calibrate`
 Will calibrate at the start to figure out how "quiet" or noisy the space is that the device is in 
 
-#--dynamic 
+`--dynamic`
 Will weight newer samples more when determining when to pass it to the audio in the back
 
-#-history <number of samples>
+`-history <number of samples>`
 Default set to 10. This is how many samples of a disturbance triggers the audio (not how long it is). Around 15 samples = 1 second. 
 
-#--no-analyze
+`--no-analyze`
 Don't analyze the content of the speech - good for testing how well the sound snipper works. 
 
 
