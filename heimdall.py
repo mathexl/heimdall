@@ -12,13 +12,13 @@ import time
 import matplotlib
 matplotlib.use('Agg') #required for it to work without a GUI environment
 import matplotlib.pyplot as plt
+import colormaps as cmaps
 from scipy.io import wavfile
 from os import listdir
 from os.path import isfile, join
 import os
 from PIL import Image
 import matplotlib.colors
-
 
 
 
@@ -32,6 +32,8 @@ import tensorflow as tf
 # pylint: disable=unused-import
 from tensorflow.contrib.framework.python.ops import audio_ops as contrib_audio
 # pylint: enable=unused-import
+
+plt.register_cmap(name='viridis', cmap=cmaps.viridis)
 
 ############ FROM TENSORFLOW FUNCTIONS #######################
 
@@ -378,12 +380,13 @@ def heimdallInit(calibrate = False, dynamic = True, history_samples = 10, conser
 					# Can't find the citation but it is pretty similar to ever public implementation of it.
 					nfft = 512  # Length of the windowing segments
 					fs = 512    # Sampling frequency
-					pxx, freqs, bins, im = plt.specgram(data, nfft,fs)
+					cmap = plt.get_cmap('viridis') #colorscheme of training data
+					pxx, freqs, bins, im = plt.specgram(data, nfft,fs, cmap=cmap)
 					plt.axis('off')
 					plt.savefig("generated_spectograms/temp.png",
 					            dpi=200, # Dots per inch
 					            frameon='false',
-								cmap=matplotlib.colors.Colormap("GnBu"),
+								cmap=cmap,
 					            aspect='normal',
 					            bbox_inches='tight',
 					            pad_inches=0) # Spectrogram saved as a .png

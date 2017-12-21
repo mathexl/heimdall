@@ -55,7 +55,8 @@ def graph_spectrogram(wav_file, output):
     # Can't find the citation but it is pretty similar to ever public implementation of it.
     nfft = 512  # Length of the windowing segments
     fs = 512    # Sampling frequency
-    pxx, freqs, bins, im = plt.specgram(data, nfft,fs)
+    cmap = plt.get_cmap('viridis')
+    pxx, freqs, bins, im = plt.specgram(data, nfft,fs, cmap = cmap)
     plt.axis('off')
     plt.savefig(output,
                 dpi=200, # Dots per inch
