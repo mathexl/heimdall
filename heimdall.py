@@ -138,7 +138,7 @@ def im_run_graph(image_data, labels, input_layer_name, output_layer_name,
 
 
 
-def heimdallInit(calibrate = False, dynamic = True, history_samples = 10, conservative = False):
+def heimdallInit(calibrate = False, dynamic = True, history_samples = 10, conservative = False, analyze = True):
 	###############################################
 	#                                             #
 	#  Takes audio stream and calls forward-pass  #
@@ -374,83 +374,86 @@ def heimdallInit(calibrate = False, dynamic = True, history_samples = 10, conser
 				for i in range (10):
 					print("#####################################################################")
 				time.sleep(1)
-				try:
-					rate, data = get_wav_info(fil)
-					# I found these next 5 lines of coding on how to create a specgram on Python online
-					# Can't find the citation but it is pretty similar to ever public implementation of it.
-					nfft = 512  # Length of the windowing segments
-					fs = 512    # Sampling frequency
-					cmap = plt.get_cmap('viridis') #colorscheme of training data
-					pxx, freqs, bins, im = plt.specgram(data, nfft,fs, cmap=cmap)
-					plt.axis('off')
-					plt.savefig("generated_spectograms/temp.png",
-					            dpi=200, # Dots per inch
-					            frameon='false',
-								cmap=cmap,
-					            aspect='normal',
-					            bbox_inches='tight',
-					            pad_inches=0) # Spectrogram saved as a .png
+				if(analyze == False):
+					try:
+						rate, data = get_wav_info(fil)
+						# I found these next 5 lines of coding on how to create a specgram on Python online
+						# Can't find the citation but it is pretty similar to ever public implementation of it.
+						nfft = 512  # Length of the windowing segments
+						fs = 512    # Sampling frequency
+						cmap = plt.get_cmap('viridis') #colorscheme of training data
+						pxx, freqs, bins, im = plt.specgram(data, nfft,fs, cmap=cmap)
+						plt.axis('off')
+						plt.savefig("generated_spectograms/temp.png",
+						            dpi=200, # Dots per inch
+						            frameon='false',
+									cmap=cmap,
+						            aspect='normal',
+						            bbox_inches='tight',
+						            pad_inches=0) # Spectrogram saved as a .png
 
-					im = Image.open("generated_spectograms/temp.png")
-					#open png file
-					rgb_im = im.convert('RGB')
-					#convert to jpg format
-					rgb_im.save("generated_spectograms/temp.jpg")
-					image_data = im_load_image("generated_spectograms/temp.jpg")
+						im = Image.open("generated_spectograms/temp.png")
+						#open png file
+						rgb_im = im.convert('RGB')
+						#convert to jpg format
+						rgb_im.save("generated_spectograms/temp.jpg")
+						image_data = im_load_image("generated_spectograms/temp.jpg")
 
-					# load labels
-					labels = im_load_labels("imagelabel.txt")
+						# load labels
+						labels = im_load_labels("imagelabel.txt")
 
-					# load graph, which is stored in the default session
-					im_load_graph("tensor_graph_larger_2.pb")
-					print("#######LESS RELIABLE SPECTOGRAM METRIC:")
-					im_run_graph(image_data, labels, 'DecodeJpeg/contents:0', 'final_result:0', 3)
-					print("")
-					print("")
-				except:
-					print("Image Recognition Failed!")
-				#from my spectrumGenerator.py file
-				################################################################################################################
-				################################################################################################################
-				## Heimdall utilizes a secondary NN to provide more context to a recording                                    ##
-				## by transcribing the audio recording into a spectogram and running it                                       ##
-				## through MobileNet which has a ~50% level of accuracy. This NN is not utilized                              ##
-				## to make a prediction - rather - helps sort between two close words that                                    ##
-				## may be similar by the primary net.                                                                         ##
-				##                                                                                                            ##
-				## The same model was trained with Inception architecture for the same accuracy.                              ##
-				## Exploding the validation set to the entire set had no effect on the training                               ##
-				## accuracy.                                                                                                  ##
-				##                                                                                                            ##
-				## This is a much more effective approach because wake words are short and                                    ##
-				## can often look different based on vocal form.                                                              ##
-				##                                                                                                            ##
-				## In order to train the net, simply run this python file in the same folder that                             ##
-				## holds all the other directories of images. It is advised to disable the print                              ##
-				## message if you want it to run in the background since writing to stdout is expensive                       ##
-				##                                                                                                            ##
-				## A pre-converted set from Google's open source wake words library into Spectograms                          ##
-				## was open sourced by this project. I have uploaded them through the following                               ##
-				## links, which includes 22,500 jpgs sorted by classification. Converting the set                             ##
-				## took a long long time (much longer than expected, file I/O seems to lock out pretty fast)                  ##
-				## so it is best to just download the pre-compiled bundle to save time.                                       ##
-				##                                                                                                            ##
-				## .zip     | https://storage.googleapis.com/speech-recog/hotwordSpectogramDataset.zip (4.54 GB)              ##
-				## .tar.gz  | https://storage.googleapis.com/speech-recog/hotwordSpectogramDataset.tar.gz (1.59 GB)           ##
-				## .tar.bz2 | https://storage.googleapis.com/speech-recog/hotwordSpectogramDataset.tar.bz2 (1.44 GB)          ##
-				################################################################################################################
-				################################################################################################################
+						# load graph, which is stored in the default session
+						im_load_graph("tensor_graph_larger_2.pb")
+						print("#######LESS RELIABLE SPECTOGRAM METRIC:")
+						im_run_graph(image_data, labels, 'DecodeJpeg/contents:0', 'final_result:0', 3)
+						print("")
+						print("")
+					except:
+						print("Image Recognition Failed!")
+					#from my spectrumGenerator.py file
+					################################################################################################################
+					################################################################################################################
+					## Heimdall utilizes a secondary NN to provide more context to a recording                                    ##
+					## by transcribing the audio recording into a spectogram and running it                                       ##
+					## through MobileNet which has a ~50% level of accuracy. This NN is not utilized                              ##
+					## to make a prediction - rather - helps sort between two close words that                                    ##
+					## may be similar by the primary net.                                                                         ##
+					##                                                                                                            ##
+					## The same model was trained with Inception architecture for the same accuracy.                              ##
+					## Exploding the validation set to the entire set had no effect on the training                               ##
+					## accuracy.                                                                                                  ##
+					##                                                                                                            ##
+					## This is a much more effective approach because wake words are short and                                    ##
+					## can often look different based on vocal form.                                                              ##
+					##                                                                                                            ##
+					## In order to train the net, simply run this python file in the same folder that                             ##
+					## holds all the other directories of images. It is advised to disable the print                              ##
+					## message if you want it to run in the background since writing to stdout is expensive                       ##
+					##                                                                                                            ##
+					## A pre-converted set from Google's open source wake words library into Spectograms                          ##
+					## was open sourced by this project. I have uploaded them through the following                               ##
+					## links, which includes 22,500 jpgs sorted by classification. Converting the set                             ##
+					## took a long long time (much longer than expected, file I/O seems to lock out pretty fast)                  ##
+					## so it is best to just download the pre-compiled bundle to save time.                                       ##
+					##                                                                                                            ##
+					## .zip     | https://storage.googleapis.com/speech-recog/hotwordSpectogramDataset.zip (4.54 GB)              ##
+					## .tar.gz  | https://storage.googleapis.com/speech-recog/hotwordSpectogramDataset.tar.gz (1.59 GB)           ##
+					## .tar.bz2 | https://storage.googleapis.com/speech-recog/hotwordSpectogramDataset.tar.bz2 (1.44 GB)          ##
+					################################################################################################################
+					################################################################################################################
 
-				try:
-					print("#######MORE RELIABLE AUDIO METRIC:")
+					try:
+						print("#######MORE RELIABLE AUDIO METRIC:")
 
-					label_wav(fil, "model/conv_labels.txt", "model/tensormodel.pb", 'wav_data:0',
-				              'labels_softmax:0', 3)
-				except:
-					print("Audio Recognition Failed!")
+						label_wav(fil, "model/conv_labels.txt", "model/tensormodel.pb", 'wav_data:0',
+					              'labels_softmax:0', 3)
+					except:
+						print("Audio Recognition Failed!")
 
 
-				time.sleep(5)
+					time.sleep(5)
+				else:
+					time.sleep(0.5)
 				soonTrigger = 0
 				short_term_memory = [0] * history_samples #reset
 				stream.start_stream()

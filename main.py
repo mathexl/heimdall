@@ -21,10 +21,12 @@ if __name__ == '__main__':
     ##############################################################################
     conservative = False
     calibrate = False
+    analyze = True
+
     v = 0
     for h in sys.argv:
-        if(v == 1):
-            history_samples = h
+        if(v ==- 1):
+            history_samples = int(h)
             v = 0
         if(h == "--dynamic"):
             dynamic = True
@@ -34,7 +36,9 @@ if __name__ == '__main__':
             conservative = True
         if(h == "-history"):
             v = 1
+        if(h == "--no-analyze"):
+            analyze = False
 
 
 
-    heimdallInit(calibrate, dynamic, history_samples, conservative)
+    heimdallInit(calibrate, dynamic, history_samples, conservative,  analyze)
