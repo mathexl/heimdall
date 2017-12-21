@@ -10,14 +10,14 @@ import random
 import sys
 import time
 import matplotlib
-#matplotlib.use('Agg') #required for it to work without a GUI environment
+matplotlib.use('Agg') #required for it to work without a GUI environment
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
 from os import listdir
 from os.path import isfile, join
 import os
 from PIL import Image
-
+import matplotlib.colors
 
 
 
@@ -33,7 +33,11 @@ import tensorflow as tf
 from tensorflow.contrib.framework.python.ops import audio_ops as contrib_audio
 # pylint: enable=unused-import
 
+############ FROM TENSORFLOW FUNCTIONS #######################
 
+def get_wav_info(wav_file):
+    rate, data = wavfile.read(wav_file)
+    return rate, data
 
 def load_graph(filename):
   """Unpersists graph from file as default graph."""
@@ -90,6 +94,45 @@ def label_wav(wav, labels, graph, input_name, output_name, how_many_labels):
 
   run_graph(wav_data, labels_list, input_name, output_name, how_many_labels)
 
+
+def im_load_image(filename):
+  """Read in the image_data to be classified."""
+  return tf.gfile.FastGFile(filename, 'rb').read()
+
+
+def im_load_labels(filename):
+  """Read in labels, one label per line."""
+  return [line.rstrip() for line in tf.gfile.GFile(filename)]
+
+
+def im_load_graph(filename):
+  """Unpersists graph from file as default graph."""
+  with tf.gfile.FastGFile(filename, 'rb') as f:
+    graph_def = tf.GraphDef()
+    graph_def.ParseFromString(f.read())
+    tf.import_graph_def(graph_def, name='')
+
+
+def im_run_graph(image_data, labels, input_layer_name, output_layer_name,
+              num_top_predictions):
+  with tf.Session() as sess:
+    # Feed the image_data as input to the graph.
+    #   predictions will contain a two-dimensional array, where one
+    #   dimension represents the input image count, and the other has
+    #   predictions per class
+    softmax_tensor = sess.graph.get_tensor_by_name(output_layer_name)
+    predictions, = sess.run(softmax_tensor, {input_layer_name: image_data})
+
+    # Sort to show labels in order of confidence
+    top_k = predictions.argsort()[-num_top_predictions:][::-1]
+    for node_id in top_k:
+      human_string = labels[node_id]
+      score = predictions[node_id]
+      print('%s (score = %.5f)' % (human_string, score))
+
+    return 0
+
+############ END FROM TENSORFLOW FUNCTIONS #######################
 
 
 
@@ -337,25 +380,71 @@ def heimdallInit(calibrate = False, dynamic = True, history_samples = 10, conser
 					fs = 512    # Sampling frequency
 					pxx, freqs, bins, im = plt.specgram(data, nfft,fs)
 					plt.axis('off')
-					plt.savefig("generated_spectograms/test.png",
+					plt.savefig("generated_spectograms/temp.png",
 					            dpi=200, # Dots per inch
 					            frameon='false',
+								cmap=matplotlib.colors.Colormap("GnBu"),
 					            aspect='normal',
 					            bbox_inches='tight',
 					            pad_inches=0) # Spectrogram saved as a .png
 
+					im = Image.open("generated_spectograms/temp.png")
+					#open png file
+					rgb_im = im.convert('RGB')
+					#convert to jpg format
+					rgb_im.save("generated_spectograms/temp.jpg")
+					image_data = im_load_image("generated_spectograms/temp.jpg")
 
+					# load labels
+					labels = im_load_labels("imagelabel.txt")
 
+					# load graph, which is stored in the default session
+					im_load_graph("tensor_graph_larger_2.pb")
+					print("#######LESS RELIABLE SPECTOGRAM METRIC:")
+					im_run_graph(image_data, labels, 'DecodeJpeg/contents:0', 'final_result:0', 3)
+					print("")
+					print("")
 				except:
-					print("Error!")
+					print("Image Recognition Failed!")
+				#from my spectrumGenerator.py file
+				################################################################################################################
+				################################################################################################################
+				## Heimdall utilizes a secondary NN to provide more context to a recording                                    ##
+				## by transcribing the audio recording into a spectogram and running it                                       ##
+				## through MobileNet which has a ~50% level of accuracy. This NN is not utilized                              ##
+				## to make a prediction - rather - helps sort between two close words that                                    ##
+				## may be similar by the primary net.                                                                         ##
+				##                                                                                                            ##
+				## The same model was trained with Inception architecture for the same accuracy.                              ##
+				## Exploding the validation set to the entire set had no effect on the training                               ##
+				## accuracy.                                                                                                  ##
+				##                                                                                                            ##
+				## This is a much more effective approach because wake words are short and                                    ##
+				## can often look different based on vocal form.                                                              ##
+				##                                                                                                            ##
+				## In order to train the net, simply run this python file in the same folder that                             ##
+				## holds all the other directories of images. It is advised to disable the print                              ##
+				## message if you want it to run in the background since writing to stdout is expensive                       ##
+				##                                                                                                            ##
+				## A pre-converted set from Google's open source wake words library into Spectograms                          ##
+				## was open sourced by this project. I have uploaded them through the following                               ##
+				## links, which includes 22,500 jpgs sorted by classification. Converting the set                             ##
+				## took a long long time (much longer than expected, file I/O seems to lock out pretty fast)                  ##
+				## so it is best to just download the pre-compiled bundle to save time.                                       ##
+				##                                                                                                            ##
+				## .zip     | https://storage.googleapis.com/speech-recog/hotwordSpectogramDataset.zip (4.54 GB)              ##
+				## .tar.gz  | https://storage.googleapis.com/speech-recog/hotwordSpectogramDataset.tar.gz (1.59 GB)           ##
+				## .tar.bz2 | https://storage.googleapis.com/speech-recog/hotwordSpectogramDataset.tar.bz2 (1.44 GB)          ##
+				################################################################################################################
+				################################################################################################################
 
+				try:
+					print("#######MORE RELIABLE AUDIO METRIC:")
 
-
-
-
-				label_wav(fil, "model/conv_labels.txt", "model/tensormodel.pb", 'wav_data:0',
-			              'labels_softmax:0', 3)
-
+					label_wav(fil, "model/conv_labels.txt", "model/tensormodel.pb", 'wav_data:0',
+				              'labels_softmax:0', 3)
+				except:
+					print("Audio Recognition Failed!")
 
 
 				time.sleep(5)

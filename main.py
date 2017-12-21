@@ -20,7 +20,7 @@ if __name__ == '__main__':
     # words, it is set to 10 here, could be set with -expected flag
     ##############################################################################
     conservative = False
-    calibrate = True
+    calibrate = False
 
 
 
