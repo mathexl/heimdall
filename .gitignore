@@ -1,2 +1,2 @@
-generated_samples/*
-generated_spectograms/*
+./generated_samples/
+./generated_spectograms/
